@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тамагочи - Telegram Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .emoji {
+            font-size: 4em;
+            margin: 20px 0;
+        }
+        .description {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+        .play-button {
+            display: inline-block;
+            background: #4ecdc4;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .play-button:hover {
+            background: #45b7d1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .features {
+            text-align: left;
+            margin: 20px 0;
+        }
+        .features li {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji">🐾</div>
+        <h1>Тамагочи</h1>
+        <div class="description">
+            Интерактивная игра для Telegram!<br>
+            Ухаживайте за своим виртуальным питомцем
+        </div>
+        
+        <a href="tamagotchi_game.html" class="play-button">
+            🎮 Играть в игру
+        </a>
+        
+        <div class="info">
+            <h3>🎮 Возможности игры:</h3>
+            <ul class="features">
+                <li>🍕 Кормление питомца</li>
+                <li>🎮 Игры и развлечения</li>
+                <li>🛁 Уход и гигиена</li>
+                <li>😴 Сон и восстановление</li>
+                <li>⭐ Развитие и уровни</li>
+                <li>💰 Система монет</li>
+                <li>🎂 Счетчик возраста</li>
+            </ul>
+        </div>
+        
+        <div class="info">
+            <h3>📱 Как играть:</h3>
+            <p>1. Откройте бота в Telegram<br>
+            2. Нажмите кнопку "🎮 Играть в игру"<br>
+            3. Игра откроется в полноэкранном режиме!</p>
+        </div>
+        
+        <div class="info">
+            <p><strong>⚠️ Важно:</strong> Игра работает только в Telegram через бота!</p>
+        </div>
+    </div>
+</body>
+</html>
