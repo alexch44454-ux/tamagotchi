@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тамагочи</title>
+    <title>Тамагочи - Игра</title>
     <style>
         body {
             margin: 0;
@@ -15,6 +15,7 @@
             align-items: center;
             min-height: 100vh;
             color: white;
+            overflow-x: hidden;
         }
         
         .game-container {
@@ -26,12 +27,14 @@
             text-align: center;
             max-width: 400px;
             width: 90%;
+            position: relative;
         }
         
         .pet-display {
             font-size: 80px;
             margin: 20px 0;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
         }
         
         .pet-name {
@@ -196,6 +199,183 @@
             margin-top: 10px;
         }
         
+        /* Анимация вылупления */
+        .hatching-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            flex-direction: column;
+        }
+        
+        .egg-container {
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 30px;
+        }
+        
+        .egg {
+            font-size: 120px;
+            animation: bounce 1s infinite;
+            transition: all 0.3s ease;
+        }
+        
+        .egg:hover {
+            transform: scale(1.1);
+        }
+        
+        .egg.clicked {
+            animation: shake 0.5s infinite;
+        }
+        
+        .hatching-text {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .click-instruction {
+            font-size: 16px;
+            text-align: center;
+            margin: 10px 0;
+            opacity: 0.8;
+            animation: blink 2s infinite;
+        }
+        
+        .crack {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-size: 120px;
+            color: rgba(255, 255, 255, 0.3);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .crack.show {
+            opacity: 1;
+            animation: crack-appear 0.5s ease-in-out;
+        }
+        
+        .crack-line {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 2px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .crack-line.show {
+            opacity: 1;
+            animation: crack-grow 0.5s ease-out;
+        }
+        
+        .crack-line-1 {
+            width: 60px;
+            height: 3px;
+            top: 30px;
+            left: 20px;
+            transform: rotate(15deg);
+        }
+        
+        .crack-line-2 {
+            width: 40px;
+            height: 3px;
+            top: 50px;
+            right: 25px;
+            transform: rotate(-20deg);
+        }
+        
+        .crack-line-3 {
+            width: 50px;
+            height: 3px;
+            bottom: 40px;
+            left: 30px;
+            transform: rotate(45deg);
+        }
+        
+        .crack-line-4 {
+            width: 35px;
+            height: 3px;
+            bottom: 60px;
+            right: 20px;
+            transform: rotate(-30deg);
+        }
+        
+        .pet-emerging {
+            font-size: 120px;
+            animation: emerge 1s ease-out;
+            margin-bottom: 30px;
+        }
+        
+        .name-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            font-size: 18px;
+            text-align: center;
+            margin: 20px 0;
+            width: 200px;
+        }
+        
+        .name-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .hatch-btn {
+            background: #4ecdc4;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        @keyframes crack-appear {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes crack-grow {
+            0% { width: 0; opacity: 0; }
+            100% { width: var(--crack-width); opacity: 1; }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 0.8; }
+            51%, 100% { opacity: 0.4; }
+        }
+        
+        @keyframes emerge {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+        
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -222,10 +402,32 @@
         .notification.show {
             transform: translateX(0);
         }
+        
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
-    <div class="game-container">
+    <!-- Оверлей вылупления -->
+    <div class="hatching-overlay" id="hatchingOverlay">
+        <div class="egg-container" id="eggContainer" onclick="crackEgg()">
+            <div class="egg" id="egg">🥚</div>
+            <div class="crack hidden" id="crack">💥</div>
+            <div class="crack-line crack-line-1" id="crackLine1"></div>
+            <div class="crack-line crack-line-2" id="crackLine2"></div>
+            <div class="crack-line crack-line-3" id="crackLine3"></div>
+            <div class="crack-line crack-line-4" id="crackLine4"></div>
+        </div>
+        <div class="hatching-text" id="hatchingText">Нажмите на яйцо, чтобы помочь питомцу вылупиться!</div>
+        <div class="click-instruction" id="clickInstruction">👆 Нажимайте на яйцо, чтобы создать трещины</div>
+        <div class="pet-emerging hidden" id="petEmerging"></div>
+        <input type="text" class="name-input hidden" id="nameInput" placeholder="Введите имя питомца" maxlength="20">
+        <button class="hatch-btn hidden" id="hatchBtn" onclick="completeHatching()">Вылупить!</button>
+    </div>
+
+    <!-- Основная игра -->
+    <div class="game-container hidden" id="gameContainer">
         <div class="pet-display" id="petDisplay">🐱</div>
         <div class="pet-name" id="petName">Мой питомец</div>
         
@@ -301,6 +503,17 @@
                 <div>Магазин</div>
             </button>
         </div>
+        
+        <div class="actions">
+            <button class="action-btn" onclick="syncWithBot()">
+                <div class="action-emoji">🔄</div>
+                <div>Синхронизация</div>
+            </button>
+            <button class="action-btn" onclick="savePetData()">
+                <div class="action-emoji">💾</div>
+                <div>Сохранить</div>
+            </button>
+        </div>
     </div>
     
     <div class="sleep-overlay" id="sleepOverlay">
@@ -338,7 +551,8 @@
             lastAction: null,
             actionCooldown: 0,
             lifeDays: 0,
-            lastFeedDay: null
+            lastFeedDay: null,
+            isHatched: false
         };
         
         // Получаем данные пользователя из Telegram
@@ -367,20 +581,15 @@
         
         // Инициализация игры
         function initGame() {
-            // Получаем данные питомца от бота
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                const user = tg.initDataUnsafe.user;
-                console.log('Telegram user:', user);
-            }
-            
             // Загружаем сохраненные данные
             loadPetData();
             
-            // Обновляем интерфейс
-            updateDisplay();
-            
-            // Запускаем игровой цикл
-            startGameLoop();
+            // Проверяем, есть ли уже питомец
+            if (petData.isHatched) {
+                startGame();
+            } else {
+                startHatching();
+            }
             
             // Обработчики кнопок Telegram
             tg.MainButton.setText('Сохранить игру');
@@ -395,11 +604,129 @@
             });
         }
         
+        // Переменные для интерактивного вылупления
+        let crackCount = 0;
+        let maxCracks = 4;
+        
+        // Начало вылупления
+        function startHatching() {
+            document.getElementById('hatchingOverlay').classList.remove('hidden');
+            document.getElementById('gameContainer').classList.add('hidden');
+            
+            // Сбрасываем счетчик трещин
+            crackCount = 0;
+            
+            // Показываем инструкцию
+            document.getElementById('hatchingText').textContent = 'Нажмите на яйцо, чтобы помочь питомцу вылупиться!';
+            document.getElementById('clickInstruction').classList.remove('hidden');
+        }
+        
+        // Обработка клика по яйцу
+        function crackEgg() {
+            if (crackCount >= maxCracks) return;
+            
+            crackCount++;
+            
+            // Добавляем анимацию тряски
+            const egg = document.getElementById('egg');
+            egg.classList.add('clicked');
+            
+            setTimeout(() => {
+                egg.classList.remove('clicked');
+            }, 500);
+            
+            // Показываем трещину
+            const crackLine = document.getElementById(`crackLine${crackCount}`);
+            crackLine.classList.add('show');
+            
+            // Обновляем текст
+            if (crackCount === 1) {
+                document.getElementById('hatchingText').textContent = 'Первая трещина! Продолжайте!';
+            } else if (crackCount === 2) {
+                document.getElementById('hatchingText').textContent = 'Трещины растут! Еще немного!';
+            } else if (crackCount === 3) {
+                document.getElementById('hatchingText').textContent = 'Почти готово! Последний клик!';
+            } else if (crackCount === maxCracks) {
+                // Показываем финальную трещину
+                document.getElementById('crack').classList.remove('hidden');
+                document.getElementById('crack').classList.add('show');
+                document.getElementById('hatchingText').textContent = 'Яйцо треснуло! Питомец вылупляется!';
+                document.getElementById('clickInstruction').classList.add('hidden');
+                
+                // Запускаем финальную анимацию
+                setTimeout(() => {
+                    showPetEmerging();
+                }, 1500);
+            }
+        }
+        
+        // Показ вылупляющегося питомца
+        function showPetEmerging() {
+            const petType = getRandomPetType();
+            const petEmoji = petTypes[petType];
+            
+            document.getElementById('egg').classList.add('hidden');
+            document.getElementById('crack').classList.add('hidden');
+            document.getElementById('petEmerging').textContent = petEmoji;
+            document.getElementById('petEmerging').classList.remove('hidden');
+            document.getElementById('hatchingText').textContent = 'Питомец вылупляется!';
+            
+            petData.type = petType;
+            
+            // Показываем поле ввода имени
+            setTimeout(() => {
+                document.getElementById('nameInput').classList.remove('hidden');
+                document.getElementById('hatchBtn').classList.remove('hidden');
+                document.getElementById('hatchingText').textContent = 'Дайте имя вашему питомцу!';
+            }, 2000);
+        }
+        
+        // Завершение вылупления
+        function completeHatching() {
+            const name = document.getElementById('nameInput').value.trim();
+            if (name) {
+                petData.name = name;
+            }
+            
+            petData.isHatched = true;
+            petData.lastFeedDay = new Date().toDateString();
+            
+            // Скрываем оверлей вылупления
+            document.getElementById('hatchingOverlay').classList.add('hidden');
+            
+            // Показываем игру
+            startGame();
+            
+            showNotification(`🎉 Поздравляем! ${petData.name} вылупился!`);
+        }
+        
+        // Начало игры
+        function startGame() {
+            document.getElementById('hatchingOverlay').classList.add('hidden');
+            document.getElementById('gameContainer').classList.remove('hidden');
+            
+            // Обновляем интерфейс
+            updateDisplay();
+            
+            // Запускаем игровой цикл
+            startGameLoop();
+            
+            // Синхронизируемся с ботом
+            syncWithBot();
+        }
+        
+        // Получение случайного типа питомца
+        function getRandomPetType() {
+            const types = Object.keys(petTypes);
+            return types[Math.floor(Math.random() * types.length)];
+        }
+        
         // Загрузка данных питомца
         function loadPetData() {
             const saved = localStorage.getItem('tamagotchi_pet');
             if (saved) {
-                petData = { ...petData, ...JSON.parse(saved) };
+                const savedData = JSON.parse(saved);
+                petData = { ...petData, ...savedData };
             }
         }
         
@@ -423,19 +750,38 @@
             if (!telegramUser) return;
             
             try {
-                // Здесь можно добавить запрос к API бота для получения данных питомца
-                // const response = await fetch('/api/get_pet_data', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify({ userId: telegramUser.id })
-                // });
-                // const botPetData = await response.json();
-                // if (botPetData) {
-                //     petData = { ...petData, ...botPetData };
-                //     updateDisplay();
-                // }
+                // Запрашиваем данные питомцев у бота
+                const requestData = {
+                    action: 'get_pet_data',
+                    userId: telegramUser.id
+                };
+                
+                if (tg.sendData) {
+                    tg.sendData(JSON.stringify(requestData));
+                }
+                
+                // Загружаем сохраненные данные как fallback
+                loadPetData();
+                updateDisplay();
+                
             } catch (error) {
                 console.log('Ошибка синхронизации с ботом:', error);
+                // Используем локальные данные
+                loadPetData();
+                updateDisplay();
+            }
+        }
+        
+        // Обработка ответа от бота
+        function handleBotResponse(data) {
+            if (data.action === 'pet_data_response' && data.pets) {
+                if (data.pets.length > 0) {
+                    // Берем первого питомца
+                    const botPet = data.pets[0];
+                    petData = { ...petData, ...botPet };
+                    updateDisplay();
+                    showNotification('Данные синхронизированы с ботом! 🔄');
+                }
             }
         }
         
@@ -447,7 +793,9 @@
             
             // Обновляем уровень и опыт
             document.getElementById('level').textContent = petData.level;
-            document.getElementById('exp').textContent = petData.exp;
+            const expNeeded = petData.level * 100;
+            const expProgress = petData.exp % 100;
+            document.getElementById('exp').textContent = `${expProgress}/${100}`;
             
             // Обновляем возраст
             const ageText = petData.lifeDays === 0 ? 'новорожденный' : `${petData.lifeDays} дней`;
@@ -594,9 +942,11 @@
             // Обновляем возраст при кормлении
             updateAge();
             
+            addExp(5);
             startActionCooldown();
-            showNotification('Питомец покормлен! 🍕');
+            showNotification('Питомец покормлен! 🍕 +5 опыта');
             updateDisplay();
+            savePetData();
         }
         
         // Обновление возраста
@@ -608,6 +958,24 @@
             }
         }
         
+        // Система уровней
+        function checkLevelUp() {
+            const expNeeded = petData.level * 100;
+            if (petData.exp >= expNeeded) {
+                petData.level++;
+                petData.exp -= expNeeded;
+                showNotification(`🎉 Уровень повышен! Новый уровень: ${petData.level}!`);
+                return true;
+            }
+            return false;
+        }
+        
+        // Добавление опыта
+        function addExp(amount) {
+            petData.exp += amount;
+            checkLevelUp();
+        }
+        
         function playWithPet() {
             if (petData.actionCooldown > 0) return;
             
@@ -615,9 +983,11 @@
             petData.energy = Math.max(0, petData.energy - 10);
             petData.hunger = Math.max(0, petData.hunger - 5);
             
+            addExp(3);
             startActionCooldown();
-            showNotification('Питомец поиграл! 🎮');
+            showNotification('Питомец поиграл! 🎮 +3 опыта');
             updateDisplay();
+            savePetData();
         }
         
         function cleanPet() {
@@ -627,9 +997,11 @@
             petData.mood = Math.min(100, petData.mood + 10);
             petData.energy = Math.max(0, petData.energy - 5);
             
+            addExp(2);
             startActionCooldown();
-            showNotification('Питомец помыт! 🛁');
+            showNotification('Питомец помыт! 🛁 +2 опыта');
             updateDisplay();
+            savePetData();
         }
         
         function putToSleep() {
@@ -691,7 +1063,177 @@
         
         // Мини-игры
         function showGames() {
-            showNotification('Мини-игры скоро будут доступны! 🎲');
+            const gameText = `
+🎲 Мини-игры
+
+Выберите игру:
+• Угадай число (5 монет) - выигрыш: 10 монет
+• Орёл или решка (3 монеты) - выигрыш: 6 монет  
+• Кости (4 монеты) - выигрыш: 8 монет
+
+У вас: ${petData.coins} монет
+            `;
+            
+            // Показываем модальное окно с играми
+            showGameModal(gameText);
+        }
+        
+        function showGameModal(text) {
+            // Создаем модальное окно для игр
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 2000;
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 30px;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255,255,255,0.2);
+                max-width: 400px;
+                text-align: center;
+                color: white;
+            `;
+            
+            content.innerHTML = `
+                <div style="white-space: pre-line; margin-bottom: 20px;">${text}</div>
+                <div id="gameButtons"></div>
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        style="background: #ff6b6b; border: none; border-radius: 10px; padding: 10px 20px; color: white; margin-top: 20px; cursor: pointer;">
+                    Закрыть
+                </button>
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            // Добавляем кнопки игр
+            const buttonsContainer = content.querySelector('#gameButtons');
+            const games = [
+                { name: '🎯 Угадай число', cost: 5, reward: 10, func: 'playGuessGame' },
+                { name: '🪙 Орёл/Решка', cost: 3, reward: 6, func: 'playCoinGame' },
+                { name: '🎲 Кости', cost: 4, reward: 8, func: 'playDiceGame' }
+            ];
+            
+            games.forEach(game => {
+                const button = document.createElement('button');
+                button.textContent = `${game.name} (${game.cost}💰)`;
+                button.style.cssText = `
+                    display: block;
+                    width: 100%;
+                    margin: 10px 0;
+                    padding: 15px;
+                    background: ${petData.coins >= game.cost ? '#4ecdc4' : '#666'};
+                    border: none;
+                    border-radius: 10px;
+                    color: white;
+                    font-size: 16px;
+                    cursor: ${petData.coins >= game.cost ? 'pointer' : 'not-allowed'};
+                `;
+                
+                if (petData.coins >= game.cost) {
+                    button.onclick = () => {
+                        modal.remove();
+                        window[game.func]();
+                    };
+                }
+                
+                buttonsContainer.appendChild(button);
+            });
+        }
+        
+        // Игра "Угадай число"
+        function playGuessGame() {
+            if (petData.coins < 5) {
+                showNotification('Недостаточно монет! 💰');
+                return;
+            }
+            
+            const number = Math.floor(Math.random() * 10) + 1;
+            const userGuess = prompt('Угадайте число от 1 до 10:');
+            
+            if (userGuess === null) return;
+            
+            const guess = parseInt(userGuess);
+            if (isNaN(guess) || guess < 1 || guess > 10) {
+                showNotification('Введите число от 1 до 10!');
+                return;
+            }
+            
+            petData.coins -= 5;
+            
+            if (guess === number) {
+                petData.coins += 10;
+                petData.exp += 5;
+                showNotification(`🎉 Победа! Число было ${number}. Получено: 10 монет, 5 опыта!`);
+            } else {
+                showNotification(`😔 Проигрыш! Число было ${number}. Потеряно: 5 монет`);
+            }
+            
+            updateDisplay();
+            savePetData();
+        }
+        
+        // Игра "Орёл или решка"
+        function playCoinGame() {
+            if (petData.coins < 3) {
+                showNotification('Недостаточно монет! 💰');
+                return;
+            }
+            
+            const result = Math.random() < 0.5 ? 'орёл' : 'решка';
+            const userChoice = prompt('Выберите: орёл или решка?');
+            
+            if (userChoice === null) return;
+            
+            petData.coins -= 3;
+            
+            if (userChoice.toLowerCase() === result) {
+                petData.coins += 6;
+                petData.exp += 3;
+                showNotification(`🎉 Победа! Выпал ${result}. Получено: 6 монет, 3 опыта!`);
+            } else {
+                showNotification(`😔 Проигрыш! Выпал ${result}. Потеряно: 3 монеты`);
+            }
+            
+            updateDisplay();
+            savePetData();
+        }
+        
+        // Игра "Кости"
+        function playDiceGame() {
+            if (petData.coins < 4) {
+                showNotification('Недостаточно монет! 💰');
+                return;
+            }
+            
+            const dice1 = Math.floor(Math.random() * 6) + 1;
+            const dice2 = Math.floor(Math.random() * 6) + 1;
+            const sum = dice1 + dice2;
+            
+            petData.coins -= 4;
+            
+            if (sum >= 7) {
+                petData.coins += 8;
+                petData.exp += 4;
+                showNotification(`🎉 Победа! Кости: ${dice1} + ${dice2} = ${sum}. Получено: 8 монет, 4 опыта!`);
+            } else {
+                showNotification(`😔 Проигрыш! Кости: ${dice1} + ${dice2} = ${sum}. Потеряно: 4 монеты`);
+            }
+            
+            updateDisplay();
+            savePetData();
         }
         
         function showShop() {
